@@ -169,7 +169,7 @@ namespace GrokNet
 
         private void ProcessPatternLine(string line)
         {
-            if (string.IsNullOrEmpty(line))
+            if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#", StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
@@ -180,10 +180,6 @@ namespace GrokNet
                 throw new FormatException("Custom pattern was not in a correct form");
             }
 
-            if (strArray[0].Equals("#", StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
             try
             {
                 Regex.Match("", strArray[1]);
