@@ -15,17 +15,21 @@ namespace GrokNet
         private readonly Dictionary<string, string> _patterns;
         private readonly Dictionary<string, string> _typeMaps;
         private Regex _compiledRegex;
+        
         private List<string> _groupNames;
+        private Dictionary<string, int> _groupNamesMap;
 
         private static readonly Regex _grokRegex = new Regex("%{(\\w+):(\\w+)(?::\\w+)?}", RegexOptions.Compiled);
         private static readonly Regex _grokRegexWithType = new Regex("%{(\\w+):(\\w+):(\\w+)?}", RegexOptions.Compiled);
         private static readonly Regex _grokWithoutName = new Regex("%{(\\w+)}", RegexOptions.Compiled);
+        
 
         public Grok(string grokPattern)
         {
             _grokPattern = grokPattern;
             _patterns = new Dictionary<string, string>();
             _typeMaps = new Dictionary<string, string>();
+            _groupNamesMap = new Dictionary<string, int>();
         }
 
         public GrokResult Parse(string text)
@@ -49,7 +53,8 @@ namespace GrokNet
                     }
                 }
             }
-            return new GrokResult(grokItems);
+
+            return new GrokResult(grokItems, _groupNamesMap);
         }
 
         private void ParseGrokString()
@@ -84,6 +89,12 @@ namespace GrokNet
 
             _compiledRegex = new Regex(pattern, RegexOptions.Compiled | RegexOptions.ExplicitCapture);
             _groupNames = _compiledRegex.GetGroupNames().ToList();
+
+            // start from i since GetGroupNames returns an empty item
+            for (var i = 1; i < _groupNames.Count; i++)
+            {
+                _groupNamesMap[_groupNames[i]] = i - 1;
+            }
         }
 
         private static object MapType(string type, string data)
