@@ -138,14 +138,31 @@ namespace GrokNet
             {
                 return;
             }
+            
             foreach (FileInfo file in directoryInfo.GetFiles("*", SearchOption.AllDirectories))
             {
-                using (StreamReader sr = file.OpenText())
+                LoadCustomPatterns(file);
+            }
+        }
+        
+        public void LoadCustomPatterns(string path)
+        {
+            FileInfo fileInfo = new FileInfo(path);
+            if (!fileInfo.Exists)
+            {
+                return;
+            }
+
+            LoadCustomPatterns(fileInfo);
+        }
+
+        private void LoadCustomPatterns(FileInfo file)
+        {
+            using (StreamReader sr = new StreamReader(file.OpenRead()))
+            {
+                while (!sr.EndOfStream)
                 {
-                    while (!sr.EndOfStream)
-                    {
-                        ProcessPatternLine(sr.ReadLine());
-                    }
+                    ProcessPatternLine(sr.ReadLine());
                 }
             }
         }
